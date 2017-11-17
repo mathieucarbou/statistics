@@ -19,9 +19,12 @@ package org.terracotta.statistics;
 import org.terracotta.context.ContextElement;
 import org.terracotta.context.ContextManager;
 import org.terracotta.context.TreeNode;
+import org.terracotta.statistics.extended.StatisticType;
 import org.terracotta.statistics.observer.OperationObserver;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -29,7 +32,9 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.function.Supplier;
+
+import static org.terracotta.statistics.SuppliedValueStatistic.supply;
 
 public class StatisticsManager extends ContextManager {
   
@@ -66,12 +71,20 @@ public class StatisticsManager extends ContextManager {
       }
     }
   }
-  
-  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Callable<T> source) {
+
+  public static <T extends Serializable> void createPassThroughStatistic(Object context, String name, Set<String> tags, StatisticType type, Supplier<T> source) {
+    createPassThroughStatistic(context, name, tags, Collections.emptyMap(), supply(type, source));
+  }
+
+  public static <T extends Serializable> void createPassThroughStatistic(Object context, String name, Set<String> tags, ValueStatistic<T> source) {
     createPassThroughStatistic(context, name, tags, Collections.emptyMap(), source);
   }
-  
-  public static <T extends Number> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, Callable<T> source) {
+
+  public static <T extends Serializable> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, StatisticType type, Supplier<T> source) {
+    createPassThroughStatistic(context, name, tags, properties, supply(type, source));
+  }
+
+  public static <T extends Serializable> void createPassThroughStatistic(Object context, String name, Set<String> tags, Map<String, ? extends Object> properties, ValueStatistic<T> source) {
     PassThroughStatistic<T> stat = new PassThroughStatistic<>(context, name, tags, properties, source);
     associate(context).withChild(stat);
   }
@@ -92,13 +105,13 @@ public class StatisticsManager extends ContextManager {
         } else if (Modifier.isStatic(m.getModifiers())) {
           throw new IllegalArgumentException("Statistic methods must be non-static: " + m);
         } else {
-          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<>(Arrays.asList(anno.tags())), new MethodCallable<>(object, m));
+          StatisticsManager.createPassThroughStatistic(object, anno.name(), new HashSet<>(Arrays.asList(anno.tags())), supply(anno.type(), new MethodCallable<>(object, m)));
         }
       } 
     }
   }
 
-  static class MethodCallable<T> implements Callable<T> {
+  static class MethodCallable<T> implements Supplier<T> {
 
     private final WeakReference<Object> targetRef;
     private final Method method;
@@ -110,8 +123,14 @@ public class StatisticsManager extends ContextManager {
 
     @Override
     @SuppressWarnings("unchecked")
-    public T call() throws Exception {
-      return (T) method.invoke(targetRef.get());
+    public T get() {
+      try {
+        return (T) method.invoke(targetRef.get());
+      } catch (IllegalAccessException e) {
+        throw new RuntimeException(e);
+      } catch (InvocationTargetException e) {
+        throw new RuntimeException(e.getTargetException());
+      }
     }
   }
 }
