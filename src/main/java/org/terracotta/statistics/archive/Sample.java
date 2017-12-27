@@ -15,13 +15,35 @@
  */
 package org.terracotta.statistics.archive;
 
+import java.io.Serializable;
+import java.util.Date;
+
 /**
- *
  * @author cdennis
  */
-public interface Timestamped<T> {
+public class Sample<T extends Serializable> implements Serializable {
+
+  private static final long serialVersionUID = 1L;
   
-  T getSample();
-  
-  long getTimestamp();
+  private final long timestamp;
+  private final T sample;
+
+  public Sample(long timestamp, T sample) {
+    this.sample = sample;
+    this.timestamp = timestamp;
+  }
+
+  public T getSample() {
+    return sample;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
+  }
+
+  @Override
+  public String toString() {
+    return getSample() + " @ " + new Date(getTimestamp());
+  }
+
 }

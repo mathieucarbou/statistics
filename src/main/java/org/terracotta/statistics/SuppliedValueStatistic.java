@@ -1,11 +1,11 @@
 /*
- * All content copyright Terracotta, Inc., unless otherwise indicated.
+ * Copyright Terracotta, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,33 +18,29 @@ package org.terracotta.statistics;
 import org.terracotta.statistics.extended.StatisticType;
 
 import java.io.Serializable;
+import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * @author cdennis
  */
-public class ConstantValueStatistic<T extends Serializable> implements ValueStatistic<T>, Serializable {
+public class SuppliedValueStatistic<T extends Serializable> implements ValueStatistic<T> {
 
-  public static <T extends Serializable> ConstantValueStatistic<T> instance(StatisticType type, T value) {
-    return new ConstantValueStatistic<>(type, value);
+  public static <T extends Serializable> ValueStatistic<T> supply(StatisticType type, Supplier<T> supplier) {
+    return new SuppliedValueStatistic<>(type, supplier);
   }
-  
-  public static <T extends Serializable> ConstantValueStatistic<T> unavailable(StatisticType type) {
-    return new ConstantValueStatistic<>(type, null);
-  }
-  
-  private static final long serialVersionUID = 1L;
-  
-  private final T value;
+
+  private final Supplier<T> supplier;
   private final StatisticType type;
 
-  private ConstantValueStatistic(StatisticType type, T value) {
-    this.value = value;
-    this.type = type;
+  private SuppliedValueStatistic(StatisticType type, Supplier<T> supplier) {
+    this.supplier = Objects.requireNonNull(supplier);
+    this.type = Objects.requireNonNull(type);
   }
 
   @Override
   public T value() {
-    return value;
+    return supplier.get();
   }
 
   @Override
