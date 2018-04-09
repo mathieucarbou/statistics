@@ -23,6 +23,7 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.terracotta.statistics.util.ConcurrentParameterized;
 
 import java.io.IOException;
 import java.util.Random;
@@ -45,10 +46,8 @@ import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 
-@RunWith(Parameterized.class)
+@RunWith(ConcurrentParameterized.class)
 public class BarSplittingBiasedHistogramPreciseTest {
-
-  private static final double ERROR_THRESHOLD = 10;
 
   private static final double[] HIGH_QUANTILES = new double[] {0.5, 0.75, 0.9, 0.99};
   private static final double[] LOW_QUANTILES = stream(HIGH_QUANTILES).map(d -> 1 - d).toArray();

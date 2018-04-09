@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.terracotta.util;
+package org.terracotta.statistics.util;
 
 import org.hamcrest.Matcher;
 import org.junit.Assert;

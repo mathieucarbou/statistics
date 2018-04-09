@@ -24,6 +24,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.terracotta.statistics.util.ConcurrentParameterized;
 
 import java.util.Arrays;
 import java.util.Random;
@@ -33,7 +34,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.junit.Assert.assertThat;
 
-@RunWith(Parameterized.class)
+@RunWith(ConcurrentParameterized.class)
 public class BarSplittingBiasedHistogramFittingTest {
 
   private static final double ERROR_THRESHOLD = 10;

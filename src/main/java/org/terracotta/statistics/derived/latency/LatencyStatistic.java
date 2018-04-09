@@ -35,7 +35,7 @@ public interface LatencyStatistic {
   Long maximum();
 
   /**
-   * @return The average in ns
+   * @return The average in ns or NaN if no value
    */
   double average();
 
