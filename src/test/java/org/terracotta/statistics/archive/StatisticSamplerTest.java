@@ -37,7 +37,7 @@ import static org.terracotta.statistics.ValueStatistics.constant;
 import static org.terracotta.statistics.StatisticType.COUNTER;
 import static org.terracotta.statistics.StatisticType.GAUGE;
 import static org.terracotta.statistics.ValueStatistics.counter;
-import static org.terracotta.statistics.util.RetryAssert.assertBy;
+import static org.terracotta.util.RetryAssert.assertBy;
 
 /**
  * @author cdennis

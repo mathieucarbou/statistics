@@ -23,7 +23,6 @@ import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.terracotta.statistics.util.ConcurrentParameterized;
 
 import java.io.IOException;
 import java.util.Random;
@@ -41,12 +40,13 @@ import static java.util.stream.DoubleStream.concat;
 import static java.util.stream.DoubleStream.generate;
 import static org.hamcrest.collection.IsArrayContainingInOrder.arrayContaining;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.number.IsCloseTo.closeTo;
 import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.hamcrest.number.OrderingComparison.greaterThanOrEqualTo;
 import static org.hamcrest.number.OrderingComparison.lessThanOrEqualTo;
 import static org.junit.Assert.assertThat;
 
-@RunWith(ConcurrentParameterized.class)
+@RunWith(Parameterized.class)
 public class BarSplittingBiasedHistogramPreciseTest {
 
   private static final double[] HIGH_QUANTILES = new double[] {0.5, 0.75, 0.9, 0.99};
@@ -128,6 +128,7 @@ public class BarSplittingBiasedHistogramPreciseTest {
 
       assertThat(histogram.getMinimum(), is(values[0]));
       assertThat(histogram.getMaximum(), is(values[i - 1]));
+      assertThat((double) histogram.size(), closeTo(values.length, values.length * 0.01));
       for (double q : quantiles) {
         double[] bounds = histogram.getQuantileBounds(q);
 
@@ -198,6 +199,7 @@ public class BarSplittingBiasedHistogramPreciseTest {
       window[window.length - 1] = values[i];
       sort(window);
 
+      assertThat((double) bsbh.size(), closeTo(window.length, window.length * 0.01));
       if (bias < 1.0) {
         assertThat(bsbh.getMaximum(), greaterThanOrEqualTo(window[window.length - 1]));
       } else if (bias > 1.0) {

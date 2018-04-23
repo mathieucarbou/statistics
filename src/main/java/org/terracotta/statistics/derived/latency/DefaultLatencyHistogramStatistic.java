@@ -120,7 +120,8 @@ public class DefaultLatencyHistogramStatistic implements LatencyHistogramStatist
   }
 
   @Override
-  public long count() {
+  public synchronized long count() {
+    tryExpire(true, timeSupplier);
     return query.count();
   }
 

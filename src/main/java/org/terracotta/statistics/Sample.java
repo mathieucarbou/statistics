@@ -61,7 +61,7 @@ public class Sample<T extends Serializable> implements Serializable {
 
   @Override
   public String toString() {
-    return sample + " @ " + timestamp;
+    return getSample() + " @ " + getTimestamp();
   }
 
 }
