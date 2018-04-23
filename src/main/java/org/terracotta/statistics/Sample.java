@@ -16,7 +16,6 @@
 package org.terracotta.statistics;
 
 import java.io.Serializable;
-import java.time.Instant;
 
 /**
  * @author cdennis
@@ -29,7 +28,7 @@ public class Sample<T extends Serializable> implements Serializable {
   private final T sample;
 
   public Sample(long timestamp, T sample) {
-    this.sample = sample;
+    this.sample = sample; // can be null
     this.timestamp = timestamp;
   }
 
@@ -45,8 +44,24 @@ public class Sample<T extends Serializable> implements Serializable {
   }
 
   @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    Sample<?> sample1 = (Sample<?>) o;
+    if (timestamp != sample1.timestamp) return false;
+    return sample != null ? sample.equals(sample1.sample) : sample1.sample == null;
+  }
+
+  @Override
+  public int hashCode() {
+    int result = (int) (timestamp ^ (timestamp >>> 32));
+    result = 31 * result + (sample != null ? sample.hashCode() : 0);
+    return result;
+  }
+
+  @Override
   public String toString() {
-    return getSample() + " @ " + Instant.ofEpochMilli(getTimestamp());
+    return sample + " @ " + timestamp;
   }
 
 }
